@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
-        <v-button large primary value="核医学信息管理系统"></v-button>
+        <v-button @click.native="hyx" large primary value="核医学信息管理系统"></v-button>
         <topmenu></topmenu>
         <router-view></router-view>
       </div>
@@ -15,8 +15,13 @@
   import menu from './hyx/menu.vue'
   export default{
     components: {
-      'v-button': btn,
+      vButton: btn,
       'topmenu': menu
+    },
+    methods: {
+      hyx: function () {
+        window.alert('核医学')
+      }
     }
   }
 </script>

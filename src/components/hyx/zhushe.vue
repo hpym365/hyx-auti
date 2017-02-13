@@ -5,7 +5,7 @@
       <hzlb :loading="loading" :dataSource="dataSource" :columns="columns" :rowClick="rowClick"></hzlb>
     </div>
     <div class="span6">
-      <biaodan :iteam="iteam"></biaodan>
+      <biaodan :iteam="iteam" :columns="columns"></biaodan>
     </div>
   </div>
 </template>

@@ -5,7 +5,7 @@
       <hzlb :loading="loading" :dataSource="dataSource" :columns="columns" :rowClick="rowClick"></hzlb>
     </div>
     <div class="span6">
-      <biaodan :iteam="iteam"></biaodan>
+      <biaodan @updaterecord="updaterecord" :iteam="iteam" :columns="columns"></biaodan>
     </div>
   </div>
 </template>
@@ -69,6 +69,15 @@
       }
     },
     methods: {
+      updaterecord: function (newiteam) {
+        console.log(newiteam)
+        debugger
+        for (var index in this.dataSource) {
+          if (this.dataSource[index].key === newiteam.key) {
+            this.$set(this.dataSource, index, newiteam)
+          }
+        }
+      },
       message: function () {
         console.log('可以住院')
       },
