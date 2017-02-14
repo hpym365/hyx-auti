@@ -19,7 +19,7 @@
               />
             </th>
             <th v-if="expandedRowRender" :class="[prefixCls + '-table-expand-icon-th']"></th>
-            <th v-for="(column, index) in columns" :width="column.width">
+            <th v-if="column.show!==false" v-for="(column, index) in columns" :width="column.width">
               <span v-html="column['title']"></span>
               <dropdown ref="filterMenu" v-if="column.filters" trigger="hover">
                 <div>
@@ -74,9 +74,9 @@
         </slot>
         </thead>
         <tbody>
-        <tr v-if="!dataList || !dataList.length">
-          <td colspan="20" style="text-align: center;" :class="[prefixCls + '-table-empty']">{{noDataTip}}</td>
-        </tr>
+        <!--<tr v-if="!dataList || !dataList.length">-->
+          <!--<td colspan="20" style="text-align: center;" :class="[prefixCls + '-table-empty']">{{noDataTip}}</td>-->
+        <!--</tr>-->
         <template v-for="(record, rowIndex) in dataList">
           <slot name="row" :record="record" :row-index="row-index">
             <tr :track-by="rowIndex" @click="onRowClick(rowIndex, record)">

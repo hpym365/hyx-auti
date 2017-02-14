@@ -5,6 +5,8 @@
       </v-tab>
       <v-tab header="注射">
       </v-tab>
+      <v-tab header="固定表头">
+      </v-tab>
     </v-tabs>
   </div>
 </template>
@@ -17,12 +19,14 @@
       return {active: 0}
     },
     methods: {
-      routeto: function (a) {
+      routeto: function (index) {
         console.log(this)
-        if (a === 0) {
+        if (index === 0) {
           router.push('wenzhen')
-        } else {
+        } else if (index === 1) {
           router.push('zhushe')
+        } else {
+          router.push('gdbt')
         }
       }
     },

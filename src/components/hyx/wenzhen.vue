@@ -41,7 +41,7 @@
             if (record.age > 40) {
               return '<p>不可以住院</p>'
             } else {
-              return '<p>可以住院</p>'
+              return '<button>可以住院</button>'
             }
           }
         }, {

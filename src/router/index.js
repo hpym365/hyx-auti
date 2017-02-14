@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import wenzhen from '../components/hyx/wenzhen.vue'
 import zhushe from '../components/hyx/zhushe.vue'
+import gdbt from '../components/hyx/gdbt.vue'
 
 Vue.use(Router)
 
@@ -20,6 +21,11 @@ var router = new Router({
       path: '/zhushe',
       name: 'zhushe',
       components: {default: zhushe}
+    },
+    {
+      path: '/gdbt',
+      name: 'gdbt',
+      components: {default: gdbt}
     }
   ],
   mode: 'history'

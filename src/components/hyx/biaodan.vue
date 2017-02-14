@@ -23,7 +23,7 @@
     <!--<v-input type="text" :value="iteam.address" placeholder="患者地址"></v-input>-->
     <!--</div>-->
     <!--<br>-->
-    <v-button @click.native="updaterecord" value="提交"></v-button>
+    <v-button @click.native="updaterecord" value="修改"></v-button>
   </div>
 </template>
 <script>
