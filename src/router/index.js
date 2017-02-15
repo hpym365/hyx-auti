@@ -28,7 +28,7 @@ var router = new Router({
       components: {default: gdbt}
     }
   ],
-  mode: 'history'
+  mode: 'hash'
 })
 
 console.log(wenzhen)

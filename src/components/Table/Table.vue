@@ -1,5 +1,5 @@
 <template>
-  <div :class="[prefixCls + '-table', prefixCls + '-table-'+ size, loading && (prefixCls + '-table-loading')]">
+  <div :style="{width: width+'px'}" :class="[prefixCls + '-table', prefixCls + '-table-'+ size, loading && (prefixCls + '-table-loading')]">
     <spin size="sm" v-if="loading"></spin>
     <!-- <table :class="['atui-table-fixed-header','atui-table']" v-if="fixedHeader">
   </table> -->
@@ -19,7 +19,7 @@
               />
             </th>
             <th v-if="expandedRowRender" :class="[prefixCls + '-table-expand-icon-th']"></th>
-            <th v-if="column.show!==false" v-for="(column, index) in columns" :width="column.width">
+            <th v-if="showheader" :class="column.fixed!==true && fixed === true ? 'is-hidden':'' " v-for="(column, index) in columns" :width="column.width">
               <span v-html="column['title']"></span>
               <dropdown ref="filterMenu" v-if="column.filters" trigger="hover">
                 <div>
@@ -91,7 +91,7 @@
                       :class="[prefixCls + '-table-row-expand-icon', prefixCls + (record.__expanded == 1 ? '-table-row-expanded' : '-table-row-collapsed') ]"
                       @click="onRowExpand(rowIndex, record)"></span>
               </td>
-              <td v-for="column in columns" :class="[column.className || '']"
+              <td v-for="column in columns" :class="column.fixed!==true && fixed === true ? 'is-hidden':[column.className || ''] "
                   @click="onColumnClick(column,record,rowIndex)">
                 <template v-if="column.render && record">
                   <span v-html="column.render.call(this._context,record[column.dataIndex],record,rowIndex)"/>
@@ -136,6 +136,17 @@
   export default {
     name: 'Table',
     props: {
+      showheader: {
+        type: Boolean,
+        default: true
+      },
+      fixed: {
+        type: Boolean,
+        default: false
+      },
+      width: {
+        type: Number
+      },
       pagination: {
         type: Object,
         default () {
