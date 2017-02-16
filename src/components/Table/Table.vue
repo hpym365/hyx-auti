@@ -4,7 +4,7 @@
     <!-- <table :class="['atui-table-fixed-header','atui-table']" v-if="fixedHeader">
   </table> -->
     <div :class="[prefixCls + '-table-container', fixedHeader && (prefixCls + '-table-fixed-header')]">
-      <table>
+      <table :class="fixed===true ?'table-fixed':''">
         <colgroup>
           <col v-if="rowSelection"></col>
           <col v-if="expandedRowRender"></col>
@@ -19,7 +19,7 @@
               />
             </th>
             <th v-if="expandedRowRender" :class="[prefixCls + '-table-expand-icon-th']"></th>
-            <th v-if="showheader" :class="column.fixed!==true && fixed === true ? 'is-hidden':'' " v-for="(column, index) in columns" :width="column.width">
+            <th v-if="showheader" :class="showall!==true && column.fixed!==true && fixed === true ? 'is-hidden':'' " v-for="(column, index) in columns" :width="column.width">
               <span v-html="column['title']"></span>
               <dropdown ref="filterMenu" v-if="column.filters" trigger="hover">
                 <div>
@@ -70,6 +70,7 @@
                       :class="[sorderOrder[index] == 'descend' && (prefixCls + '-table-active')]"></icon>
               </div>
             </th>
+            <th v-if="fixed && showall && showheader!==false" width="18"></th>
           </tr>
         </slot>
         </thead>
@@ -91,7 +92,7 @@
                       :class="[prefixCls + '-table-row-expand-icon', prefixCls + (record.__expanded == 1 ? '-table-row-expanded' : '-table-row-collapsed') ]"
                       @click="onRowExpand(rowIndex, record)"></span>
               </td>
-              <td v-for="column in columns" :class="column.fixed!==true && fixed === true ? 'is-hidden':[column.className || ''] "
+              <td v-for="column in columns" :class="showall!==true && column.fixed!==true && fixed === true ? 'is-hidden':[column.className || ''] "
                   @click="onColumnClick(column,record,rowIndex)">
                 <template v-if="column.render && record">
                   <span v-html="column.render.call(this._context,record[column.dataIndex],record,rowIndex)"/>
@@ -139,6 +140,10 @@
       showheader: {
         type: Boolean,
         default: true
+      },
+      showall: {
+        type: Boolean,
+        default: false
       },
       fixed: {
         type: Boolean,
