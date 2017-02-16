@@ -17,12 +17,14 @@
         <v-table :fixed="fixed" :showall="showall" :showheader="showheader" :data-source="dataSource" :columns="columns"
                  :width="tableWidth"></v-table>
       </div>
-      <div ref="fixedHeaderWrapper" class="divHeaderFlow" :style="{height: headerHeight+'px'}">
-        <v-table :fixed="fixed" :columns="columns"></v-table>
-      </div>
-      <div ref="fixedBodyWrapper" class="divBodyFlow" :style="{height: fixedBodyHeight+'px'}">
-        <v-table :showheader="showheader" :fixed="fixed" :columns="columns" :data-source="dataSource"></v-table>
-      </div>
+      <template v-if="fixed">
+        <div ref="fixedHeaderWrapper" class="divHeaderFlow" :style="{height: headerHeight+'px'}">
+          <v-table :fixed="fixed" :columns="columns"></v-table>
+        </div>
+        <div ref="fixedBodyWrapper" class="divBodyFlow" :style="{height: fixedBodyHeight+'px'}">
+          <v-table :showheader="showheader" :fixed="fixed" :columns="columns" :data-source="dataSource"></v-table>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -83,10 +85,14 @@
   import table from '../Table/Table.vue'
 
   export default{
+    props: {
+      tableHeight: {
+        type: Number
+      }
+    },
     data () {
       return {
         outter: 17,
-        tableHeight: 200,
         headerHeight: 51,
         showall: true,
         fixed: true,
@@ -318,13 +324,13 @@
 
         if (fixedBodyWrapper) {
           this.mousewheel(fixedBodyWrapper, function (event) {
-            const wheelDelta = event.wheelDelta
-            if (wheelDelta < 0) {
-              bodyWrapper.scrollTop += 10
-            } else {
-              bodyWrapper.scrollTop -= 10
+              const wheelDelta = event.wheelDelta
+              if (wheelDelta < 0) {
+                bodyWrapper.scrollTop += 10
+              } else {
+                bodyWrapper.scrollTop -= 10
+              }
             }
-          }
           )
         }
 
@@ -367,6 +373,14 @@
       },
       fixedBodyHeight () {
         return this.tableHeight - this.headerHeight - this.outter
+      },
+      fixed () {
+        for (var i = 0; i < this.columns.length; i++) {
+          if (this.columns.fixed === true) {
+            return true
+          }
+        }
+        return false
       }
     }
   }
