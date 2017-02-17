@@ -9,6 +9,7 @@
     <!--</div>-->
     <!--</div>-->
     <!--<br>-->
+    <p>参数 {{fixedLeftColumns}} {{fixedRightColumns}} && {{fixed}} && {{fixedComputed}}</p>
     <div class="divmain" :style="{width: width+'px', height: tableHeight+'px'}">
       <div ref="headerWrapper" class="divheader" :style="{height: headerHeight+'px'}">
         <v-table :fixed="fixed" :showall="showall" :columns="columns" :width="tableWidth"></v-table>
@@ -19,15 +20,176 @@
       </div>
       <template v-if="fixed">
         <div ref="fixedHeaderWrapper" class="divHeaderFlow" :style="{height: headerHeight+'px'}">
-          <v-table :fixed="fixed" :columns="columns"></v-table>
+          <v-table :fixed="fixed" :columns="fixedLeftColumns"></v-table>
         </div>
         <div ref="fixedBodyWrapper" class="divBodyFlow" :style="{height: fixedBodyHeight+'px'}">
-          <v-table :showheader="showheader" :fixed="fixed" :columns="columns" :data-source="dataSource"></v-table>
+          <v-table :showheader="showheader" :fixed="fixed" :columns="fixedLeftColumns" :data-source="dataSource"></v-table>
         </div>
       </template>
     </div>
   </div>
 </template>
+
+<script>
+  import table from '../Table/Table.vue'
+
+  export default{
+    props: {
+      tableHeight: {
+        type: Number
+      },
+      width: {
+        type: Number
+      },
+      dataSource: {
+        type: Array,
+        default: []
+      },
+      columns: {
+        type: Array,
+        default: []
+      },
+      loading: {
+        type: Boolean,
+        default: false
+      }
+    },
+    data () {
+      return {
+        outter: 17,
+        headerHeight: 51,
+        showall: true,
+        fixed: false,
+        showheader: false,
+        iteam: {},
+        fixedLeftColumns: [],
+        fixedRightColumns: []
+      }
+    },
+    methods: {
+      deepCopy: function (source) {
+        var result = {}
+        for (var key in source) {
+          result[key] = typeof source[key] === 'object' ? this.deepCopy(source[key]) : source[key]
+        }
+        return result
+      },
+      updaterecord: function (newiteam) {
+        console.log(newiteam)
+        for (var index in this.dataSource) {
+          if (this.dataSource[index].key === newiteam.key) {
+            this.$set(this.dataSource, index, newiteam)
+          }
+        }
+      },
+      message: function () {
+        console.log('可以住院')
+      },
+      rowClick: function (index, iteam) {
+        console.log(index)
+        console.log(iteam)
+        this.iteam = iteam
+        for (var key in iteam) {
+          console.log(key)
+        }
+      },
+      bindEvents: function () {
+        const {headerWrapper, bodyWrapper, fixedBodyWrapper} = this.$refs
+//        const refs = this.$refs
+        bodyWrapper.addEventListener('scroll', function () {
+          if (headerWrapper) headerWrapper.scrollLeft = this.scrollLeft
+          if (fixedBodyWrapper) fixedBodyWrapper.scrollTop = this.scrollTop
+//          if (refs.rightFixedBodyWrapper) refs.rightFixedBodyWrapper.scrollTop = this.scrollTop;
+        })
+
+        if (fixedBodyWrapper) {
+          this.mousewheel(fixedBodyWrapper,
+            function (event) {
+              const wheelDelta = event.wheelDelta
+              if (wheelDelta < 0) {
+                bodyWrapper.scrollTop += 10
+              } else {
+                bodyWrapper.scrollTop -= 10
+              }
+            }
+          )
+        }
+
+//        if (this.fit) {
+//          this.windowResizeListener = throttle(50, () => {
+//            if (this.$ready) this.doLayout();
+//          });
+//          addResizeListener(this.$el, this.windowResizeListener);
+//        }
+      },
+      mousewheel: function (element, callback) {
+        const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+
+        if (element && element.addEventListener) {
+          element.addEventListener(isFirefox ? 'DOMMouseScroll' : 'mousewheel', callback)
+        }
+      }
+    },
+    components: {
+      'v-table': table
+    },
+    mounted () {
+      this.bindEvents()
+    },
+    watch: {
+      columns () {
+      }
+    },
+    computed: {
+      bodytable () {
+        return this.$ref.bodyWrapper
+      },
+      tableWidth () {
+        var tbwidth = 18
+        for (var i = 0; i < this.columns.length; i++) {
+          tbwidth += this.columns.width
+        }
+        return tbwidth
+      },
+      bodyHeight () {
+        return this.tableHeight - this.headerHeight
+      },
+      fixedBodyHeight () {
+        return this.tableHeight - this.headerHeight - this.outter
+      },
+      fixedComputed () {
+        this.fixedLeftColumns = []
+        var noFixedLeftColumns = []
+        var noFixedRightColumns = []
+        var newcolumns = []
+        for (var i = 0; i < this.columns.length; i++) {
+          var column = this.columns[i]
+          var noFixcolumn = this.deepCopy(this.columns[i])
+          noFixcolumn.fixed = false
+          if (this.columns[i].fixed === true || this.columns[i].fixed === 'left' || this.columns[i].fixed === 'right') {
+            this.fixed = true
+            //  一会处理datalist
+            if (this.columns[i].fixed === 'right') {
+              this.fixedRightColumns.push(column)
+              noFixedLeftColumns.push(noFixcolumn)
+            } else {
+              this.fixedLeftColumns.push(column)
+              noFixedRightColumns.push(noFixcolumn)
+            }
+          } else {
+            newcolumns.push(column)
+            noFixedLeftColumns.push(noFixcolumn)
+            noFixedRightColumns.push(noFixcolumn)
+          }
+        }
+        console.log(this.fixedLeftColumns)
+        this.fixedLeftColumns = this.fixedLeftColumns.concat(noFixedLeftColumns)
+        this.fixedRightColumns = this.fixedRightColumns.concat(noFixedRightColumns)
+        return this.fixed
+      }
+    }
+  }
+</script>
 <style>
   .is-hidden {
     visibility: hidden;
@@ -79,309 +241,3 @@
     border: 1px solid #942a25;
   }
 </style>
-<script>
-  import hzlb from './hzlb.vue'
-  import biaodan from './biaodan.vue'
-  import table from '../Table/Table.vue'
-
-  export default{
-    props: {
-      tableHeight: {
-        type: Number
-      }
-    },
-    data () {
-      return {
-        outter: 17,
-        headerHeight: 51,
-        showall: true,
-        fixed: true,
-        showheader: false,
-        width: 700,
-        iteam: {},
-        dataSource: [{
-          key: '1',
-          name: '问诊病人胡彦斌',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '1',
-          name: '问诊病人胡彦斌',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '1',
-          name: '问诊病人胡彦斌',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '1',
-          name: '问诊病人胡彦斌',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园2号'
-        }],
-        dataSource1: [{
-          key: '1',
-          name: '问诊病人胡ds1',
-          age: 11,
-          address: '西湖区湖底公园ds1'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦ds1',
-          age: 22,
-          address: '西湖区湖底公园ds1'
-        }, {
-          key: '2',
-          name: '问诊病人胡ds1',
-          age: 33,
-          address: '西湖区湖底公园ds1'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 44,
-          address: '西湖区湖底公园2号'
-        }, {
-          key: '2',
-          name: '问诊病人胡彦祖',
-          age: 55,
-          address: '西湖区湖底公园2号'
-        }],
-        loading: false,
-        columns: [{
-          title: 'body字段1',
-          dataIndex: 'name',
-          key: 'name',
-          fixed: true,
-          width: 180
-        }, {
-          title: 'body字段2',
-          dataIndex: 'age',
-          key: 'age',
-          width: 180
-        }, {
-          title: 'body字段3',
-          dataIndex: 'address',
-          key: 'address',
-          width: 180
-        }, {
-          title: 'body字段4',
-          dataIndex: 'name',
-          key: 'name',
-          width: 180
-        }, {
-          title: 'body字段5',
-          dataIndex: 'age',
-          key: 'age',
-          width: 180
-        }, {
-          title: 'body字段6',
-          dataIndex: 'address',
-          key: 'address',
-          width: 180
-        }],
-        columns1: [{
-          title: 'body字段1F',
-          dataIndex: 'name',
-          key: 'name',
-          fixed: true,
-          width: 180
-        }, {
-          title: 'body字段2F',
-          dataIndex: 'age',
-          key: 'age',
-          width: 180
-        }, {
-          title: 'body字段3F',
-          dataIndex: 'address',
-          key: 'address',
-          width: 180
-        }, {
-          title: 'body字段4F',
-          dataIndex: 'name',
-          key: 'name',
-          width: 180
-        }, {
-          title: 'body字段5F',
-          dataIndex: 'age',
-          key: 'age',
-          width: 180
-        }, {
-          title: 'body字段6F',
-          dataIndex: 'address',
-          key: 'address',
-          width: 180
-        }]
-      }
-    },
-    methods: {
-      updaterecord: function (newiteam) {
-        console.log(newiteam)
-        for (var index in this.dataSource) {
-          if (this.dataSource[index].key === newiteam.key) {
-            this.$set(this.dataSource, index, newiteam)
-          }
-        }
-      },
-      message: function () {
-        console.log('可以住院')
-      },
-      rowClick: function (index, iteam) {
-        console.log(index)
-        console.log(iteam)
-        this.iteam = iteam
-        for (var key in iteam) {
-          console.log(key)
-        }
-      },
-      bindEvents: function () {
-        const {headerWrapper, bodyWrapper, fixedBodyWrapper} = this.$refs
-//        const refs = this.$refs
-        bodyWrapper.addEventListener('scroll', function () {
-          if (headerWrapper) headerWrapper.scrollLeft = this.scrollLeft
-          if (fixedBodyWrapper) fixedBodyWrapper.scrollTop = this.scrollTop
-//          if (refs.rightFixedBodyWrapper) refs.rightFixedBodyWrapper.scrollTop = this.scrollTop;
-        })
-
-        if (fixedBodyWrapper) {
-          this.mousewheel(fixedBodyWrapper, function (event) {
-              const wheelDelta = event.wheelDelta
-              if (wheelDelta < 0) {
-                bodyWrapper.scrollTop += 10
-              } else {
-                bodyWrapper.scrollTop -= 10
-              }
-            }
-          )
-        }
-
-//        if (this.fit) {
-//          this.windowResizeListener = throttle(50, () => {
-//            if (this.$ready) this.doLayout();
-//          });
-//          addResizeListener(this.$el, this.windowResizeListener);
-//        }
-      },
-      mousewheel: function (element, callback) {
-        const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().indexOf('firefox') > -1
-
-        if (element && element.addEventListener) {
-          element.addEventListener(isFirefox ? 'DOMMouseScroll' : 'mousewheel', callback)
-        }
-      }
-    },
-    components: {
-      'hzlb': hzlb,
-      'biaodan': biaodan,
-      'v-table': table
-    },
-    mounted () {
-      this.bindEvents()
-    },
-    computed: {
-      bodytable () {
-        return this.$ref.bodyWrapper
-      },
-      tableWidth () {
-        var tbwidth = 18
-        for (var i = 0; i < this.columns.length; i++) {
-          tbwidth += this.columns.width
-        }
-        return tbwidth
-      },
-      bodyHeight () {
-        return this.tableHeight - this.headerHeight
-      },
-      fixedBodyHeight () {
-        return this.tableHeight - this.headerHeight - this.outter
-      },
-      fixed () {
-        for (var i = 0; i < this.columns.length; i++) {
-          if (this.columns.fixed === true) {
-            return true
-          }
-        }
-        return false
-      }
-    }
-  }
-</script>
