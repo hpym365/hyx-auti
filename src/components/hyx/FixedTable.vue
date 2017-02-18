@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!--<div class="divmain" style="width: 100%; height: 200px;">-->
-    <!--<div class="divheader" style="height: 50px;">-->
+    <!--<div class="fixedMain" style="width: 100%; height: 200px;">-->
+    <!--<div class="headerWrapper" style="height: 50px;">-->
     <!--<v-table :columns="columns"></v-table>-->
     <!--</div>-->
     <!--<div class="divbody" style="height: 150px;">-->
@@ -9,22 +9,35 @@
     <!--</div>-->
     <!--</div>-->
     <!--<br>-->
-    <p>参数 {{fixedLeftColumns}} {{fixedRightColumns}} && {{fixed}} && {{fixedComputed}}</p>
-    <div class="divmain" :style="{width: width+'px', height: tableHeight+'px'}">
-      <div ref="headerWrapper" class="divheader" :style="{height: headerHeight+'px'}">
-        <v-table :fixed="fixed" :showall="showall" :columns="columns" :width="tableWidth"></v-table>
+    <p>left {{fixedLeftColumns}} right {{fixedRightColumns}} && {{fixed}} && {{fixedComputed}}</p>
+    <br>
+    <p>参数 {{bodyColumns}}</p>
+    <p>参数 {{tableWidth}}</p>
+    <div style="width: 760px; border: 1px solid #dfe6ec;">abc</div>
+    <div class="fixedMainWrapper" :style="{width: tableWidth+'px', height: tableHeight+'px'}">
+      <div ref="headerWrapper" class="headerWrapper" :style="{height: headerHeight+'px'}">
+        <v-table :fixed="fixed" :columns="bodyColumns" :tableWidth="fixedTableWidth"></v-table>
       </div>
       <div ref="bodyWrapper" class="divbody" :style="{height: bodyHeight+'px'}">
-        <v-table :fixed="fixed" :showall="showall" :showheader="showheader" :data-source="dataSource" :columns="columns"
-                 :width="tableWidth"></v-table>
+        <v-table :fixed="fixed" :showheader="showheader" :data-source="dataSource" :columns="bodyColumns"
+                 :tableWidth="fixedTableWidth"></v-table>
       </div>
       <template v-if="fixed">
-        <div ref="fixedHeaderWrapper" class="divHeaderFlow" :style="{height: headerHeight+'px'}">
-          <v-table :fixed="fixed" :columns="fixedLeftColumns"></v-table>
+        <div ref="headerFixedLeftWrapper" class="headerFixedLeft" :style="{height: headerHeight+'px'}">
+          <v-table :fixed="fixed" :columns="fixedLeftColumns" :showAllColumns="showAllColumns"></v-table>
         </div>
-        <div ref="fixedBodyWrapper" class="divBodyFlow" :style="{height: fixedBodyHeight+'px'}">
-          <v-table :showheader="showheader" :fixed="fixed" :columns="fixedLeftColumns" :data-source="dataSource"></v-table>
+        <div ref="bodyFixedLeftWrapper" class="bodyFixedLeft" :style="{height: fixedBodyHeight+'px'}">
+          <v-table :showheader="showheader" :fixed="fixed" :columns="fixedLeftColumns"
+                   :data-source="dataSource" :showAllColumns="showAllColumns"></v-table>
         </div>
+        <div ref="headerFixedRightWrapper" class="headerFixedRight" :style="{height: headerHeight+'px'}">
+          <v-table :fixed="fixed" :columns="fixedRightColumns" :showAllColumns="showAllColumns"></v-table>
+        </div>
+        <div ref="bodyFixedRightWrapper" class="bodyFixedRight" :style="{height: fixedBodyHeight+'px'}">
+          <v-table :showheader="showheader" :fixed="fixed" :columns="fixedRightColumns"
+                   :data-source="dataSource" :showAllColumns="showAllColumns"></v-table>
+        </div>
+        <div class="el-table__fixed-right-patch" style="width: 17px; height: 51px;"></div>
       </template>
     </div>
   </div>
@@ -38,7 +51,7 @@
       tableHeight: {
         type: Number
       },
-      width: {
+      tableWidth: {
         type: Number
       },
       dataSource: {
@@ -58,12 +71,13 @@
       return {
         outter: 17,
         headerHeight: 51,
-        showall: true,
+        showAllColumns: false,
         fixed: false,
         showheader: false,
         iteam: {},
         fixedLeftColumns: [],
-        fixedRightColumns: []
+        fixedRightColumns: [],
+        bodyColumns: []
       }
     },
     methods: {
@@ -94,16 +108,30 @@
         }
       },
       bindEvents: function () {
-        const {headerWrapper, bodyWrapper, fixedBodyWrapper} = this.$refs
+        const {headerWrapper, bodyWrapper, bodyFixedLeftWrapper, bodyFixedRightWrapper} = this.$refs
 //        const refs = this.$refs
         bodyWrapper.addEventListener('scroll', function () {
           if (headerWrapper) headerWrapper.scrollLeft = this.scrollLeft
-          if (fixedBodyWrapper) fixedBodyWrapper.scrollTop = this.scrollTop
+          if (bodyFixedLeftWrapper) bodyFixedLeftWrapper.scrollTop = this.scrollTop
+          if (bodyFixedRightWrapper) bodyFixedRightWrapper.scrollTop = this.scrollTop
 //          if (refs.rightFixedBodyWrapper) refs.rightFixedBodyWrapper.scrollTop = this.scrollTop;
         })
 
-        if (fixedBodyWrapper) {
-          this.mousewheel(fixedBodyWrapper,
+        if (bodyFixedLeftWrapper) {
+          this.mousewheel(bodyFixedLeftWrapper,
+            function (event) {
+              const wheelDelta = event.wheelDelta
+              if (wheelDelta < 0) {
+                bodyWrapper.scrollTop += 10
+              } else {
+                bodyWrapper.scrollTop -= 10
+              }
+            }
+          )
+        }
+
+        if (bodyFixedRightWrapper) {
+          this.mousewheel(bodyFixedRightWrapper,
             function (event) {
               const wheelDelta = event.wheelDelta
               if (wheelDelta < 0) {
@@ -144,12 +172,12 @@
       bodytable () {
         return this.$ref.bodyWrapper
       },
-      tableWidth () {
-        var tbwidth = 18
+      fixedTableWidth () {
+        var width = 0
         for (var i = 0; i < this.columns.length; i++) {
-          tbwidth += this.columns.width
+          width += this.columns.width
         }
-        return tbwidth
+        return width + 18
       },
       bodyHeight () {
         return this.tableHeight - this.headerHeight
@@ -159,6 +187,8 @@
       },
       fixedComputed () {
         this.fixedLeftColumns = []
+        this.fixedRightColumns = []
+        this.bodyColumns = []
         var noFixedLeftColumns = []
         var noFixedRightColumns = []
         var newcolumns = []
@@ -177,20 +207,29 @@
               noFixedRightColumns.push(noFixcolumn)
             }
           } else {
-            newcolumns.push(column)
+            newcolumns.push(noFixcolumn)
             noFixedLeftColumns.push(noFixcolumn)
             noFixedRightColumns.push(noFixcolumn)
           }
         }
         console.log(this.fixedLeftColumns)
+        this.bodyColumns = this.fixedLeftColumns.concat(newcolumns).concat(this.fixedRightColumns)
         this.fixedLeftColumns = this.fixedLeftColumns.concat(noFixedLeftColumns)
-        this.fixedRightColumns = this.fixedRightColumns.concat(noFixedRightColumns)
+        this.fixedRightColumns = noFixedRightColumns.concat(this.fixedRightColumns)
         return this.fixed
       }
     }
   }
 </script>
 <style>
+  .el-table__fixed-right-patch {
+    position: absolute;
+    top: 0px;
+    right: 0;
+    background-color: #eef1f6;
+    border: 1px solid #dfe6ec;
+  }
+
   .is-hidden {
     visibility: hidden;
   }
@@ -199,7 +238,7 @@
     table-layout: fixed;
   }
 
-  .divBodyFlow {
+  .bodyFixedLeft {
     overflow: hidden;
     position: absolute;
     top: 52px;
@@ -208,7 +247,7 @@
     bottom: 18px;
   }
 
-  .divHeaderFlow {
+  .headerFixedLeft {
     overflow: hidden;
     position: absolute;
     top: 1px;
@@ -216,21 +255,36 @@
     right: 18px;
   }
 
-  .divmain {
+  .bodyFixedRight {
+    overflow: hidden;
+    position: absolute;
+    top: 52px;
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .headerFixedRight {
+    overflow: hidden;
+    position: absolute;
+    top: 1px;
+    right: 16px;
+  }
+
+  .fixedMainWrapper {
     border: 1px solid #000;
     overflow: hidden;
     position: relative;
   }
 
-  .divmain table td {
+  .fixedMainWrapper table td {
     border: 1px solid #00a0ff;
   }
 
-  .divmain table th {
+  .fixedMainWrapper table th {
     border: 1px solid #00a0ff;
   }
 
-  .divheader {
+  .headerWrapper {
     /*padding-right: 18px;*/
     border: 1px solid #00a0ff;
     overflow: hidden;

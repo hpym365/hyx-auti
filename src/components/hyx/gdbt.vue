@@ -1,6 +1,7 @@
 <template>
   <div>
-    <FixedTable :tableHeight="tableHeight" :width="width" :dataSource="dataSource" :columns="columns"></FixedTable>
+    <FixedTable :tableHeight="tableHeight" :tableWidth="tableWidth" :dataSource="dataSource"
+                :columns="columns"></FixedTable>
   </div>
 </template>
 
@@ -11,7 +12,7 @@
     data () {
       return {
         tableHeight: 200,
-        width: 700,
+        tableWidth: 733,
         loading: false,
         dataSource: [{
           key: '1',
@@ -145,6 +146,7 @@
           title: 'body字段6',
           dataIndex: 'address',
           key: 'address',
+          fixed: 'right',
           width: 180
         }]
       }

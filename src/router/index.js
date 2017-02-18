@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import wenzhen from '../components/hyx/wenzhen.vue'
 import zhushe from '../components/hyx/zhushe.vue'
 import gdbt from '../components/hyx/gdbt.vue'
+import gbkd from '../components/hyx/gbkd.vue'
 
 Vue.use(Router)
 
@@ -26,6 +27,11 @@ var router = new Router({
       path: '/gdbt',
       name: 'gdbt',
       components: {default: gdbt}
+    },
+    {
+      path: '/gbkd',
+      name: 'gbkd',
+      components: {default: gbkd}
     }
   ],
   mode: 'hash'

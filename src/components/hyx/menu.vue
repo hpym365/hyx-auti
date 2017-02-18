@@ -7,6 +7,8 @@
       </v-tab>
       <v-tab header="固定表头">
       </v-tab>
+      <v-tab header="改变宽度">
+      </v-tab>
     </v-tabs>
   </div>
 </template>
@@ -25,8 +27,10 @@
           router.push('wenzhen')
         } else if (index === 1) {
           router.push('zhushe')
-        } else {
+        } else if (index === 2) {
           router.push('gdbt')
+        } else if (index === 3) {
+          router.push('gbkd')
         }
       }
     },
@@ -38,8 +42,12 @@
       console.log(router)
       if (router.currentRoute.name === 'wenzhen') {
         this.active = 0
-      } else {
+      } else if (router.currentRoute.name === 'zhushe') {
         this.active = 1
+      } else if (router.currentRoute.name === 'gdbt') {
+        this.active = 2
+      } else if (router.currentRoute.name === 'gbkd') {
+        this.active = 3
       }
     }
   }
