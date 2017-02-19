@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <p>{{tableWidth}}</p>
-    <table style="width: 500px;border: 2px solid #002a80;">
+  <div style="position: relative">
+    <div style="border: 2px solid #002a80; width: 177px;"></div>
+    <table style="border: 2px solid #002a80;">
       <tr style="border: 2px solid #002a80;">
         <td style="border: 2px solid #002a80;">123</td>
         <td id="gblk" :style="{width: column.width+'px', border:'2px solid #002a80'}" @mousemove="mousemove"
@@ -18,13 +18,13 @@
     data () {
       return {
         column: {
-          width: 30
-        }
+          width: 150
+        },
+        resizeProxyVisible: false
       }
     },
     methods: {
       mousemove () {
-        console.log('123')
         console.log('mousemove')
         let target = event.target
         let rect = target.getBoundingClientRect()
@@ -40,9 +40,8 @@
       mousedown (event, column) {
         this.dragging = true
 
-        this.$parent.resizeProxyVisible = true
+        this.resizeProxyVisible = true
         console.log(this)
-        debugger
         const tableEl = this.$parent.$el
         const tableLeft = tableEl.getBoundingClientRect().left
         const columnEl = this.$el.querySelector('#gblk')
@@ -57,6 +56,8 @@
           startColumnLeft: columnRect.left - tableLeft,
           tableLeft
         }
+
+        console.log(this.dragState)
 
         const resizeProxy = this.$refs.resizeProxy
         resizeProxy.style.left = this.dragState.startLeft + 'px'
@@ -81,14 +82,14 @@
             const columnWidth = finalLeft - this.dragState.startColumnLeft
             column.width = column.realWidth = columnWidth
 
-            this.store.scheduleLayout()
+//            this.store.scheduleLayout()
 
             document.body.style.cursor = ''
             this.dragging = false
             this.draggingColumn = null
             this.dragState = {}
 
-            this.$parent.resizeProxyVisible = false
+            this.resizeProxyVisible = false
           }
 
           document.removeEventListener('mousemove', handleMouseMove)
@@ -107,3 +108,15 @@
     }
   }
 </script>
+
+<style>
+  .el-table__column-resize-proxy {
+    position: absolute;
+    left: 200px;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    border-left: 3px solid #000000;
+    z-index: 10;
+  }
+</style>
